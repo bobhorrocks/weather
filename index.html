@@ -3,24 +3,31 @@
 <head>
   <meta charset="utf-8">
   <title>ESP32 Dashboard</title>
-  <style>
-    body { font-family: Arial; background:#111; color:white; text-align:center; }
-    .box { margin:20px; padding:10px; background:#222; border-radius:10px; }
-    img { width:90%; max-width:500px; border-radius:10px; }
-  </style>
-</head>
 
-<body>
-
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>ESP32 Dashboard</title>
   <style>
-    body { font-family: Arial; background:#111; color:white; text-align:center; }
-    .box { margin:20px; padding:15px; background:#222; border-radius:10px; }
-    img { width:90%; max-width:500px; border-radius:10px; }
+    body {
+      font-family: Arial;
+      background: #111;
+      color: white;
+      text-align: center;
+    }
+
+    .box {
+      margin: 20px;
+      padding: 15px;
+      background: #222;
+      border-radius: 10px;
+    }
+
+    img {
+      width: 90%;
+      max-width: 500px;
+      border-radius: 10px;
+    }
+
+    h1 {
+      margin-top: 20px;
+    }
   </style>
 </head>
 
@@ -44,38 +51,52 @@
 </div>
 
 <div class="box">
-  <h2>Camera</h2>
+  <h2>Camera (Dropbox)</h2>
   <img id="cam">
 </div>
 
 <script>
+
 const user = "bobbyh73";
 
-// 📊 Temperature
-fetch(`https://io.adafruit.com/api/v2/${user}/feeds/temperature/data/last`)
-  .then(r => r.json())
-  .then(d => document.getElementById("temp").innerText = d.value);
+// 📊 SAFE ADAFRUIT IO LOADER
+function loadFeed(feed, elementId) {
+  fetch(`https://io.adafruit.com/api/v2/${user}/feeds/${feed}`)
+    .then(r => r.json())
+    .then(d => {
+      const value = d.last_value ?? d.value ?? "No data";
+      document.getElementById(elementId).innerText = value;
+    })
+    .catch(err => {
+      document.getElementById(elementId).innerText = "Error";
+      console.log(feed, err);
+    });
+}
 
-// 💧 Humidity
-fetch(`https://io.adafruit.com/api/v2/${user}/feeds/humidity/data/last`)
-  .then(r => r.json())
-  .then(d => document.getElementById("hum").innerText = d.value);
+// initial load
+function updateAll() {
+  loadFeed("temperature", "temp");
+  loadFeed("humidity", "hum");
+  loadFeed("pressure", "press");
+}
 
-// 🌡 Pressure
-fetch(`https://io.adafruit.com/api/v2/${user}/feeds/pressure/data/last`)
-  .then(r => r.json())
-  .then(d => document.getElementById("press").innerText = d.value);
-
-// 📸 DROPBOX DIRECT IMAGE 
+// 📸 DROPBOX IMAGE
 const dropboxImage =
-"https://www.dropbox.com/scl/fi/0yn95qw6p854gza58jgvi/esp32_vga.jpg?rlkey=wp3axq2rzh9fauccz838jc94e&st=39iei1iw&raw=1";
+"https://www.dropbox.com/scl/fi/0yn95qw6p854gza58jgvi/esp32_vga.jpg?raw=1";
 
-// prevent caching (important for ESP32 photos)
-document.getElementById("cam").src = dropboxImage + "&t=" + new Date().getTime();
-
-setInterval(() => {
+function loadImage() {
   document.getElementById("cam").src =
     dropboxImage + "&t=" + new Date().getTime();
+}
+
+// start
+updateAll();
+loadImage();
+
+// refresh every 5 seconds
+setInterval(() => {
+  updateAll();
+  loadImage();
 }, 5000);
 
 </script>
