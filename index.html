@@ -73,9 +73,9 @@ function loadFeed(feed, elementId) {
 }
 
 function updateSensors() {
-  loadFeed("temperature", "temp");
-  loadFeed("humidity", "hum");
-  loadFeed("pressure", "press");
+  loadFeed("temperature", "temp", 1);
+  loadFeed("humidity", "hum", 1);
+  loadFeed("pressure", "press", 0);
 }
 
 // -------------------------
