@@ -59,12 +59,18 @@
 
 const user = "bobbyh73";
 
-// 📊 SAFE ADAFRUIT IO LOADER
+// -------------------------
+// 📊 ADAFRUIT IO SAFE LOADER
+// -------------------------
 function loadFeed(feed, elementId) {
   fetch(`https://io.adafruit.com/api/v2/${user}/feeds/${feed}`)
     .then(r => r.json())
     .then(d => {
-      const value = d.last_value ?? d.value ?? "No data";
+      const value =
+        (d && d.last_value !== undefined) ? d.last_value :
+        (d && d.value !== undefined) ? d.value :
+        "No data";
+
       document.getElementById(elementId).innerText = value;
     })
     .catch(err => {
@@ -73,29 +79,35 @@ function loadFeed(feed, elementId) {
     });
 }
 
-// initial load
-function updateAll() {
+// update all sensors
+function updateSensors() {
   loadFeed("temperature", "temp");
   loadFeed("humidity", "hum");
   loadFeed("pressure", "press");
 }
 
-// 📸 DROPBOX IMAGE
+// -------------------------
+// 📸 DROPBOX IMAGE (FIXED)
+// -------------------------
+
 const dropboxImage =
 "https://www.dropbox.com/scl/fi/0yn95qw6p854gza58jgvi/esp32_vga.jpg?raw=1";
 
 function loadImage() {
   document.getElementById("cam").src =
-    dropboxImage + "&t=" + new Date().getTime();
+    dropboxImage + "&cache=" + Date.now();
 }
 
-// start
-updateAll();
+// -------------------------
+// 🚀 START
+// -------------------------
+
+updateSensors();
 loadImage();
 
 // refresh every 5 seconds
 setInterval(() => {
-  updateAll();
+  updateSensors();
   loadImage();
 }, 5000);
 
