@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>ESP32 Dashboard</title>
+  <style>
+    body { font-family: Arial; background:#111; color:white; text-align:center; }
+    .box { margin:20px; padding:10px; background:#222; border-radius:10px; }
+    img { width:90%; max-width:500px; border-radius:10px; }
+  </style>
+</head>
+
+<body>
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>ESP32 Dashboard</title>
+  <style>
+    body { font-family: Arial; background:#111; color:white; text-align:center; }
+    .box { margin:20px; padding:15px; background:#222; border-radius:10px; }
+    img { width:90%; max-width:500px; border-radius:10px; }
+  </style>
+</head>
+
+<body>
+
+<h1>ESP32 Live Dashboard</h1>
+
+<div class="box">
+  <h2>Temperature</h2>
+  <div id="temp">Loading...</div>
+</div>
+
+<div class="box">
+  <h2>Humidity</h2>
+  <div id="hum">Loading...</div>
+</div>
+
+<div class="box">
+  <h2>Pressure</h2>
+  <div id="press">Loading...</div>
+</div>
+
+<div class="box">
+  <h2>Camera</h2>
+  <img id="cam">
+</div>
+
+<script>
+const user = "bobbyh73";
+
+// 📊 Temperature
+fetch(`https://io.adafruit.com/api/v2/${user}/feeds/temperature/data/last`)
+  .then(r => r.json())
+  .then(d => document.getElementById("temp").innerText = d.value);
+
+// 💧 Humidity
+fetch(`https://io.adafruit.com/api/v2/${user}/feeds/humidity/data/last`)
+  .then(r => r.json())
+  .then(d => document.getElementById("hum").innerText = d.value);
+
+// 🌡 Pressure
+fetch(`https://io.adafruit.com/api/v2/${user}/feeds/pressure/data/last`)
+  .then(r => r.json())
+  .then(d => document.getElementById("press").innerText = d.value);
+
+// 📸 DROPBOX DIRECT IMAGE 
+const dropboxImage =
+"https://www.dropbox.com/scl/fi/0yn95qw6p854gza58jgvi/esp32_vga.jpg?rlkey=wp3axq2rzh9fauccz838jc94e&st=39iei1iw&raw=1";
+
+// prevent caching (important for ESP32 photos)
+document.getElementById("cam").src = dropboxImage + "&t=" + new Date().getTime();
+
+setInterval(() => {
+  document.getElementById("cam").src =
+    dropboxImage + "&t=" + new Date().getTime();
+}, 5000);
+
+</script>
+
+</body>
+</html>
