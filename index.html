@@ -24,6 +24,10 @@
       max-width: 500px;
       border-radius: 10px;
     }
+
+    h1 {
+      margin-top: 20px;
+    }
   </style>
 </head>
 
@@ -47,7 +51,7 @@
 </div>
 
 <div class="box">
-  <h2>Camera (Dropbox)</h2>
+  <h2>Camera</h2>
   <img id="cam">
 </div>
 
@@ -56,14 +60,21 @@
 const user = "bobbyh73";
 
 // -------------------------
-// 📊 ADAFRUIT IO FEEDS
+// 📊 ADAFRUIT IO LOADER (FORMATTED)
 // -------------------------
-function loadFeed(feed, elementId) {
+function loadFeed(feed, elementId, decimals = null) {
   fetch(`https://io.adafruit.com/api/v2/${user}/feeds/${feed}`)
     .then(r => r.json())
     .then(d => {
-      const value =
-        d?.last_value ?? d?.value ?? "No data";
+
+      let value = d?.last_value ?? d?.value ?? "No data";
+
+      // format numbers
+      if (value !== "No data" && !isNaN(value)) {
+        if (decimals !== null) {
+          value = parseFloat(value).toFixed(decimals);
+        }
+      }
 
       document.getElementById(elementId).innerText = value;
     })
@@ -72,22 +83,22 @@ function loadFeed(feed, elementId) {
     });
 }
 
+// update sensors
 function updateSensors() {
-  loadFeed("temperature", "temp");
-  loadFeed("humidity", "hum");
-  loadFeed("pressure", "press");
+  loadFeed("temperature", "temp", 1); // 1 decimal
+  loadFeed("humidity", "hum", 1);      // 1 decimal
+  loadFeed("pressure", "press", 2);    // 2 decimals
 }
 
 // -------------------------
-// 📸 DROPBOX IMAGE (STABLE)
+// 📸 CAMERA (DROPBOX)
 // -------------------------
 const dropboxImage =
-"https://www.dropbox.com/scl/fi/0yn95qw6p854gza58jgvi/esp32_vga.jpg?rlkey=wp3axq2rzh9fauccz838jc94e&raw=1";
+"https://www.dropbox.com/scl/fi/0yn95qw6p854gza58jgvi/esp32_vga.jpg?raw=1";
 
 function loadImage() {
   const img = document.getElementById("cam");
 
-  // force clean reload (prevents caching issues)
   img.src = "";
   setTimeout(() => {
     img.src = dropboxImage + "&t=" + Date.now();
@@ -100,7 +111,7 @@ function loadImage() {
 updateSensors();
 loadImage();
 
-// ⏱ refresh every 3 minutes (matches ESP32 cycle)
+// refresh every 3 minutes
 setInterval(() => {
   updateSensors();
   loadImage();
