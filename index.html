@@ -24,10 +24,6 @@
       max-width: 500px;
       border-radius: 10px;
     }
-
-    h1 {
-      margin-top: 20px;
-    }
   </style>
 </head>
 
@@ -60,26 +56,22 @@
 const user = "bobbyh73";
 
 // -------------------------
-// 📊 ADAFRUIT IO SAFE LOADER
+// 📊 ADAFRUIT IO FEEDS
 // -------------------------
 function loadFeed(feed, elementId) {
   fetch(`https://io.adafruit.com/api/v2/${user}/feeds/${feed}`)
     .then(r => r.json())
     .then(d => {
       const value =
-        (d && d.last_value !== undefined) ? d.last_value :
-        (d && d.value !== undefined) ? d.value :
-        "No data";
+        d?.last_value ?? d?.value ?? "No data";
 
       document.getElementById(elementId).innerText = value;
     })
-    .catch(err => {
+    .catch(() => {
       document.getElementById(elementId).innerText = "Error";
-      console.log(feed, err);
     });
 }
 
-// update all sensors
 function updateSensors() {
   loadFeed("temperature", "temp");
   loadFeed("humidity", "hum");
@@ -87,25 +79,28 @@ function updateSensors() {
 }
 
 // -------------------------
-// 📸 DROPBOX IMAGE (FIXED)
+// 📸 DROPBOX IMAGE (STABLE)
 // -------------------------
-
 const dropboxImage =
-"https://www.dropbox.com/scl/fi/0yn95qw6p854gza58jgvi/esp32_vga.jpg?raw=1";
+"https://www.dropbox.com/scl/fi/0yn95qw6p854gza58jgvi/esp32_vga.jpg?rlkey=wp3axq2rzh9fauccz838jc94e&raw=1";
 
 function loadImage() {
-  document.getElementById("cam").src =
-    dropboxImage + "&cache=" + Date.now();
+  const img = document.getElementById("cam");
+
+  // force clean reload (prevents caching issues)
+  img.src = "";
+  setTimeout(() => {
+    img.src = dropboxImage + "&t=" + Date.now();
+  }, 100);
 }
 
 // -------------------------
 // 🚀 START
 // -------------------------
-
 updateSensors();
 loadImage();
 
-// refresh every 3 minutes
+// ⏱ refresh every 3 minutes (matches ESP32 cycle)
 setInterval(() => {
   updateSensors();
   loadImage();
