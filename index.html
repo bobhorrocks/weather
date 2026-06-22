@@ -24,10 +24,6 @@
       max-width: 500px;
       border-radius: 10px;
     }
-
-    h1 {
-      margin-top: 20px;
-    }
   </style>
 </head>
 
@@ -60,21 +56,14 @@
 const user = "bobbyh73";
 
 // -------------------------
-// 📊 ADAFRUIT IO LOADER (FORMATTED)
+// 📊 ADAFRUIT IO FEEDS
 // -------------------------
-function loadFeed(feed, elementId, decimals = null) {
+function loadFeed(feed, elementId) {
   fetch(`https://io.adafruit.com/api/v2/${user}/feeds/${feed}`)
     .then(r => r.json())
     .then(d => {
-
-      let value = d?.last_value ?? d?.value ?? "No data";
-
-      // format numbers
-      if (value !== "No data" && !isNaN(value)) {
-        if (decimals !== null) {
-          value = parseFloat(value).toFixed(decimals);
-        }
-      }
+      const value =
+        d?.last_value ?? d?.value ?? "No data";
 
       document.getElementById(elementId).innerText = value;
     })
@@ -83,22 +72,22 @@ function loadFeed(feed, elementId, decimals = null) {
     });
 }
 
-// update sensors
 function updateSensors() {
-  loadFeed("temperature", "temp", 1); // 1 decimal
-  loadFeed("humidity", "hum", 1);      // 1 decimal
-  loadFeed("pressure", "press", 2);    // 2 decimals
+  loadFeed("temperature", "temp");
+  loadFeed("humidity", "hum");
+  loadFeed("pressure", "press");
 }
 
 // -------------------------
-// 📸 CAMERA (DROPBOX)
+// 📸 DROPBOX IMAGE (STABLE)
 // -------------------------
 const dropboxImage =
-"https://www.dropbox.com/scl/fi/0yn95qw6p854gza58jgvi/esp32_vga.jpg?raw=1";
+"https://www.dropbox.com/scl/fi/0yn95qw6p854gza58jgvi/esp32_vga.jpg?rlkey=wp3axq2rzh9fauccz838jc94e&raw=1";
 
 function loadImage() {
   const img = document.getElementById("cam");
 
+  // force clean reload (prevents caching issues)
   img.src = "";
   setTimeout(() => {
     img.src = dropboxImage + "&t=" + Date.now();
@@ -111,7 +100,7 @@ function loadImage() {
 updateSensors();
 loadImage();
 
-// refresh every 3 minutes
+// ⏱ refresh every 3 minutes (matches ESP32 cycle)
 setInterval(() => {
   updateSensors();
   loadImage();
